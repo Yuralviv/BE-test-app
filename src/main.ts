@@ -16,11 +16,7 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
-    origin: process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) ?? [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://localhost:4200',
-    ],
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
