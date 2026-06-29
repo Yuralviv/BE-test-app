@@ -23,7 +23,9 @@ export class CacheService {
   }
 
   async onModuleDestroy() {
-    const redisClient = (this.cache.store as any).getClient();
-    redisClient.quit();
+    const redisClient = (this.cache.store as any)?.getClient?.();
+    if (redisClient) {
+      redisClient.quit();
+    }
   }
 }
