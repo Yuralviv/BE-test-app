@@ -1,19 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DeviceOs } from '@prisma/client';
+import { IsBoolean, IsNumber } from 'class-validator';
 
 export class GeoDto {
   @ApiProperty({ example: 51.5074 })
+  @IsNumber()
   lat: number;
 
   @ApiProperty({ example: -0.1278 })
+  @IsNumber()
   lng: number;
 }
 
 export class BatteryStateDto {
   @ApiProperty({ example: 78 })
+  @IsNumber()
   level: number;
 
   @ApiProperty({ example: false })
+  @IsBoolean()
   charging: boolean;
 }
 
