@@ -1,42 +1,21 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
-import { CreateDeviceDto } from './dto/create-device.dto';
 import { UpdateDeviceTelemetryDto } from './dto/update-device-telemetry.dto';
 
 @Injectable()
 export class DevicesService {
   constructor(private readonly db: DatabaseService) {}
 
-  async create(data: CreateDeviceDto) {
-    const existing = await this.db.device.findUnique({
-      where: { imei: data.imei },
-    });
-
-    if (existing) {
-      throw new ConflictException(`Device with imei ${data.imei} already exists`);
-    }
-
-    return this.db.device.create({
-      data: {
-        ...data,
-        geo: {},
-        batteryState: {},
-      },
-    });
-  }
-
   async updateTelemetry(imei: string, data: UpdateDeviceTelemetryDto) {
     try {
       return await this.db.device.update({
         where: { imei },
         data: {
-          geo: data.geo as Prisma.InputJsonValue,
-          batteryState: data.batteryState as Prisma.InputJsonValue,
+          geo: data.geo as unknown as Prisma.InputJsonValue,
+          batteryState: data.batteryState as unknown as Prisma.InputJsonValue,
+          batteryType: data.batteryType,
+          firmwareVersion: data.firmwareVersion,
         },
       });
     } catch (error) {
@@ -48,11 +27,5 @@ export class DevicesService {
       }
       throw error;
     }
-  }
-
-  findAll() {
-    return this.db.device.findMany({
-      orderBy: { updatedAt: 'desc' },
-    });
   }
 }

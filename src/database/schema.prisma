@@ -17,15 +17,37 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model Customer {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String   @unique
+  password  String
+  devices   Device[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum DeviceOs {
+  ANDROID
+  LINUX
+}
+
 model Device {
   id           Int      @id @default(autoincrement())
+  customerId   String
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   iccid        String
   imei         String   @unique
   deviceModel  String
   motorType    String
-  batteryType  String
-  geo          Json
-  batteryState Json
+  batteryType     String
+  os              DeviceOs
+  firmwareVersion String
+  geo             Json
+  batteryState    Json
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([customerId])
 }

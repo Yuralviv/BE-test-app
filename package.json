@@ -21,6 +21,7 @@
     "db:migrate:dev": "npx prisma migrate dev",
     "db:migrate:prod": "npx prisma migrate deploy",
     "db:studio": "npx prisma studio",
+    "db:seed": "ts-node src/database/seed.ts",
     "docker:start": "docker compose up -d"
   },
   "dependencies": {
@@ -62,6 +63,7 @@
     "typescript": "^5.1.3"
   },
   "prisma": {
-    "schema": "src/database/schema.prisma"
+    "schema": "src/database/schema.prisma",
+    "seed": "ts-node src/database/seed.ts"
   }
 }
