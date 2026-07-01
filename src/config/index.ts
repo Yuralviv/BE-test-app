@@ -5,7 +5,7 @@ export default () => {
   let username = process.env.REDIS_USERNAME;
   let password = process.env.REDIS_PASSWORD;
 
-  if (redisUrl && !host) {
+  if (redisUrl) {
     try {
       const url = new URL(redisUrl);
       host = url.hostname;
