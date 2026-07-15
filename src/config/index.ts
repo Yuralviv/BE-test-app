@@ -19,11 +19,15 @@ export default () => {
 
   return {
     environment: process.env.NODE_ENV || `development`,
+    jwt: {
+      secret: process.env.JWT_SECRET || 'dev-secret-change-me',
+    },
     redis: {
       host,
       port,
       username,
       password,
+      useRedis: Boolean(redisUrl),
     },
   };
 };

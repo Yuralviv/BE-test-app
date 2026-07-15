@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "start:dev",
+      "type": "shell",
+      "command": "source ~/.nvm/nvm.sh && pnpm run start:dev",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "docker:start",
+      "type": "shell",
+      "command": "source ~/.nvm/nvm.sh && pnpm run docker:start",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "db:studio",
+      "type": "shell",
+      "command": "source ~/.nvm/nvm.sh && pnpm run db:studio",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "db:seed",
+      "type": "shell",
+      "command": "source ~/.nvm/nvm.sh && pnpm run db:seed",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "db:migrate:dev",
+      "type": "shell",
+      "command": "source ~/.nvm/nvm.sh && pnpm run db:migrate:dev",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

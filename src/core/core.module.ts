@@ -23,15 +23,17 @@ import { CacheService } from './cache/cache.service';
     CacheModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const host = configService.get<string>('redis.host');
-        const port = configService.get<string>('redis.port');
+        const useRedis = configService.get<boolean>('redis.useRedis');
 
-        if (!host) {
+        if (!useRedis) {
           return { isGlobal: true, ttl: 10 };
         }
 
+        const host = configService.get<string>('redis.host');
+        const port = configService.get<string>('redis.port');
         const username = configService.get('redis.username');
         const password = configService.get('redis.password');
+
         return {
           isGlobal: true,
           store: redisStore,

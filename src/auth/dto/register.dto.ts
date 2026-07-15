@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { DeviceOs } from '@prisma/client';
+import { DeviceOs } from '../../database/enums/device-os.enum';
 import { Type } from 'class-transformer';
 import {
   IsEmail,

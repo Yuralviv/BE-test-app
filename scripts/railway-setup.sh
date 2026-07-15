@@ -14,14 +14,14 @@ if ! command -v railway >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "→ Adding Postgres (skip if already exists)..."
-railway add --database postgres || true
+if ! railway status >/dev/null 2>&1; then
+  echo "No linked project. Run: railway link"
+  exit 1
+fi
 
-echo "→ Adding Redis (skip if already exists)..."
-railway add --database redis || true
-
-echo ""
 echo "→ Linking env variables to $SERVICE_NAME..."
+echo "  (Postgres/Redis must already exist in the project — this script does NOT create databases)"
+echo ""
 
 railway variable set "DATABASE_URL=\${{${POSTGRES_NAME}.DATABASE_URL}}" --service "$SERVICE_NAME"
 railway variable set "REDIS_URL=\${{${REDIS_NAME}.REDIS_URL}}" --service "$SERVICE_NAME"
@@ -29,7 +29,6 @@ railway variable set "NODE_ENV=production" --service "$SERVICE_NAME"
 
 echo ""
 echo "Done. Redeploy will start automatically."
-echo "Then: $SERVICE_NAME → Settings → Networking → Generate Domain"
 echo ""
-echo "If DATABASE_URL still missing, check Postgres service name in Dashboard"
+echo "If DATABASE_URL is missing, check Postgres service name in Dashboard"
 echo "and rerun with: RAILWAY_POSTGRES_NAME=YourPostgresName ./scripts/railway-setup.sh"

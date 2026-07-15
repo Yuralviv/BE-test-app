@@ -31,27 +31,37 @@ async function bootstrap() {
 
   const swaggerConfigBuilder = new DocumentBuilder()
     .setTitle('Motocaddy BE API')
-    .setDescription(
-      [
-        'Backend for the Motocaddy device board and mobile registration flow.',
-        '',
-        '**Auth**',
-        '- `POST /auth/register` — register customer and bind the device used for signup',
-        '',
-        '**Customers (board)**',
-        '- `GET /customers?page=1&limit=20` — paginated list with all devices per customer',
-        '- `GET /customers/search?q={term}` — global search by email, iccid or imei',
-        '',
-        '**Devices**',
-        '- `PUT /devices/:imei` — update geo, batteryState, batteryType, firmwareVersion from device',
-        '',
-        'All successful responses are wrapped as `{ data: ... }`. Paginated list also returns `{ meta: { page, limit, total, totalPages } }`.',
-      ].join('\n'),
-    )
-    .setVersion('1.0')
-    .addTag('auth', 'Customer registration with device binding')
-    .addTag('customers', 'Board list, pagination and global search')
-    .addTag('devices', 'Device telemetry updates');
+    // .setDescription(
+    //   [
+    //     'Backend for the Motocaddy device board and CRM.',
+    //     '',
+    //     '**Auth (CRM)**',
+    //     '- `POST /auth/crm/login` — login for MANAGER / ADMIN (returns access + refresh tokens)',
+    //     '- `POST /auth/crm/refresh` — get new access token from refresh token',
+    //     '- `GET /auth/crm/me` — current user profile (Bearer token)',
+    //     '- `PATCH /auth/crm/reset-password` — change password (Bearer token)',
+    //     '- `POST /auth/crm/registration` — create MANAGER user (**ADMIN only**)',
+    //     '',
+    //     '**Admins** — requires ADMIN token',
+    //     '- `GET /admins/all` — list CRM staff (MANAGER + ADMIN)',
+    //     '',
+    //     '**Customers (board)** — requires CRM token (MANAGER or ADMIN)',
+    //     '- `GET /customers?page=1&limit=20` — paginated list with devices',
+    //     '- `GET /customers/search?q={term}` — search by email, iccid or imei',
+    //     '',
+    //     '**Devices**',
+    //     '- `PUT /devices/:imei` — update geo, batteryState, batteryType, firmwareVersion',
+    //     '',
+    //     'All successful responses are wrapped as `{ data: ... }`.',
+    //     'Paginated customer list also returns `{ meta: { page, limit, total, totalPages } }`.',
+    //   ].join('\n'),
+    // )
+    // .setVersion('1.0')
+    // .addBearerAuth()
+    // .addTag('auth', 'CRM registration, login, refresh and profile')
+    // .addTag('admins', 'CRM staff management (admin only)')
+    // .addTag('customers', 'Board list, pagination and global search')
+    // .addTag('devices', 'Device telemetry updates');
 
   if (publicUrl) {
     swaggerConfigBuilder.addServer(publicUrl, 'Production');

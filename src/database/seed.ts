@@ -1,79 +1,56 @@
-import { PrismaClient } from '@prisma/client';
-import { MOCK_CUSTOMERS } from '../customers/data/mock-customers';
+import 'reflect-metadata';
+import { AppDataSource } from './data-source';
+import { DeviceModel } from './entities/device-model.entity';
+import { User } from './entities/user.entity';
+import { UserRole } from './enums/user-role.enum';
+import {
+  MOCK_ADMIN,
+  MOCK_CUSTOMERS,
+  MOCK_MANAGER,
+} from '../customers/data/mock-customers';
 import { hashPassword } from '../customers/utils/hash-password';
 
-const prisma = new PrismaClient();
+const DEVICE_MODELS = [
+  { id: 2, name: 'Motocaddy M5/S5 GPS Electric Trolley', iccidRequired: true },
+  { id: 3, name: 'Motocaddy M5/S5 GPS DHC Electric Trolley', iccidRequired: true },
+  { id: 6, name: 'Motocaddy M-TECH Electric Trolley', iccidRequired: true },
+  { id: 7, name: 'Motocaddy M7 GPS Electric Trolley', iccidRequired: true },
+];
 
 async function main() {
-  for (const customer of MOCK_CUSTOMERS) {
-    const password = hashPassword(customer.password);
+  await AppDataSource.initialize();
 
-    await prisma.customer.upsert({
-      where: { id: customer.id },
-      update: {
-        firstName: customer.firstName,
-        lastName: customer.lastName,
-        email: customer.email,
-        password,
-      },
-      create: {
-        id: customer.id,
-        firstName: customer.firstName,
-        lastName: customer.lastName,
-        email: customer.email,
-        password,
-      },
+  const deviceModelRepo = AppDataSource.getRepository(DeviceModel);
+  const userRepo = AppDataSource.getRepository(User);
+
+  for (const model of DEVICE_MODELS) {
+    await deviceModelRepo.save({
+      id: model.id,
+      name: model.name,
+      iccidRequired: model.iccidRequired,
     });
-
-    for (const device of customer.devices) {
-      await prisma.device.upsert({
-        where: { imei: device.imei },
-        update: {
-          customerId: customer.id,
-          iccid: device.iccid,
-          deviceModel: device.deviceModel,
-          motorType: device.motorType,
-          batteryType: device.batteryType,
-          os: device.os,
-          firmwareVersion: device.firmwareVersion,
-          geo: device.geo,
-          batteryState: device.batteryState,
-          createdAt: new Date(device.createdAt),
-          updatedAt: new Date(device.updatedAt),
-        },
-        create: {
-          id: device.id,
-          customerId: customer.id,
-          iccid: device.iccid,
-          imei: device.imei,
-          deviceModel: device.deviceModel,
-          motorType: device.motorType,
-          batteryType: device.batteryType,
-          os: device.os,
-          firmwareVersion: device.firmwareVersion,
-          geo: device.geo,
-          batteryState: device.batteryState,
-          createdAt: new Date(device.createdAt),
-          updatedAt: new Date(device.updatedAt),
-        },
-      });
-    }
   }
 
-  await prisma.$executeRawUnsafe(`
-    SELECT setval(
-      pg_get_serial_sequence('"Device"', 'id'),
-      COALESCE((SELECT MAX(id) FROM "Device"), 1)
-    )
-  `);
+  const users = [...MOCK_CUSTOMERS, MOCK_MANAGER, MOCK_ADMIN];
+
+  for (const user of users) {
+    await userRepo.save({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      password: hashPassword(user.password),
+      role: (user.role as UserRole) ?? UserRole.CUSTOMER,
+    });
+  }
+
+  await AppDataSource.destroy();
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (error) => {
-    console.error(error);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+main().catch(async (error) => {
+  console.error(error);
+  if (AppDataSource.isInitialized) {
+    await AppDataSource.destroy();
+  }
+  process.exit(1);
+});
