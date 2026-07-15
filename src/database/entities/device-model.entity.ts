@@ -9,7 +9,7 @@ export class DeviceModel {
   @Column()
   name: string;
 
-  @Column({ default: false })
+  @Column({ name: 'iccidRequired', default: false })
   iccidRequired: boolean;
 
   @OneToMany(() => Device, (device) => device.deviceModelRef)

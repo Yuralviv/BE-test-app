@@ -16,10 +16,10 @@ export class User {
   @PrimaryColumn()
   id: string;
 
-  @Column()
+  @Column({ name: 'firstName' })
   firstName: string;
 
-  @Column()
+  @Column({ name: 'lastName' })
   lastName: string;
 
   @Column({ unique: true })
@@ -36,46 +36,46 @@ export class User {
   })
   role: UserRole;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ name: 'phoneNumber', type: 'varchar', nullable: true })
   phoneNumber: string | null;
 
   @Column({ type: 'varchar', unique: true, nullable: true })
   username: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ name: 'secretKey', type: 'varchar', nullable: true })
   secretKey: string | null;
 
-  @Column({ default: false })
+  @Column({ name: 'emailVerified', default: false })
   emailVerified: boolean;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ name: 'verificationCodeSentAt', type: 'timestamp', nullable: true })
   verificationCodeSentAt: Date | null;
 
-  @Column({ default: false })
+  @Column({ name: 'termsAgreed', default: false })
   termsAgreed: boolean;
 
-  @Column({ default: false })
+  @Column({ name: 'marketingTermsAgreed', default: false })
   marketingTermsAgreed: boolean;
 
   @Column({ type: 'varchar', nullable: true })
   address: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ name: 'address2', type: 'varchar', nullable: true })
   address2: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   city: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ name: 'postalCode', type: 'varchar', nullable: true })
   postalCode: string | null;
 
   @OneToMany('Device', 'user')
   devices: Device[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'createdAt' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updatedAt' })
   updatedAt: Date;
 
   @BeforeInsert()

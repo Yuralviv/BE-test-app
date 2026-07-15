@@ -22,17 +22,17 @@ export class Device {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ name: 'idDevice' })
   idDevice: string;
 
-  @Column()
+  @Column({ name: 'deviceModelId' })
   deviceModelId: number;
 
   @ManyToOne(() => DeviceModel, (model) => model.devices)
   @JoinColumn({ name: 'deviceModelId' })
   deviceModelRef: DeviceModel;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ name: 'userId', type: 'varchar', nullable: true })
   userId: string | null;
 
   @ManyToOne(() => User, (user) => user.devices, {
@@ -48,10 +48,10 @@ export class Device {
   @Column({ type: 'varchar', unique: true, nullable: true })
   imei: string | null;
 
-  @Column({ default: '28V' })
+  @Column({ name: 'motorType', default: '28V' })
   motorType: string;
 
-  @Column({ default: 'Lithium' })
+  @Column({ name: 'batteryType', default: 'Lithium' })
   batteryType: string;
 
   @Column({
@@ -62,18 +62,18 @@ export class Device {
   })
   os: DeviceOs;
 
-  @Column({ default: '0.0.0' })
+  @Column({ name: 'firmwareVersion', default: '0.0.0' })
   firmwareVersion: string;
 
   @Column({ type: 'jsonb', default: () => `'{"lat":0,"lng":0}'` })
   geo: Geo;
 
-  @Column({ type: 'jsonb', default: () => `'{"level":0,"charging":false}'` })
+  @Column({ name: 'batteryState', type: 'jsonb', default: () => `'{"level":0,"charging":false}'` })
   batteryState: BatteryState;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'createdAt' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updatedAt' })
   updatedAt: Date;
 }
