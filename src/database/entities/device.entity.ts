@@ -32,7 +32,7 @@ export class Device {
   @JoinColumn({ name: 'deviceModelId' })
   deviceModelRef: DeviceModel;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   userId: string | null;
 
   @ManyToOne(() => User, (user) => user.devices, {
@@ -42,10 +42,10 @@ export class Device {
   @JoinColumn({ name: 'userId' })
   user: User | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   iccid: string | null;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ type: 'varchar', unique: true, nullable: true })
   imei: string | null;
 
   @Column({ default: '28V' })
