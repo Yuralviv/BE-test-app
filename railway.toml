@@ -3,6 +3,6 @@ builder = "RAILPACK"
 buildCommand = "pnpm build"
 
 [deploy]
-startCommand = "node dist/database/run-migrations.js && node dist/main"
+startCommand = "node dist/database/run-migrations.js && node dist/database/repair-schema.js && node dist/main"
 healthcheckPath = "/"
 restartPolicyType = "ON_FAILURE"
