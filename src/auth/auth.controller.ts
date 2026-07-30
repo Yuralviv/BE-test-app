@@ -33,6 +33,7 @@ import {
   DeviceSecretKeyGuard,
   DeviceAuthRequest,
 } from './guards/device-secret-key.guard';
+import { SkipTransform } from '../core/decorators/skip-transform.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -71,6 +72,41 @@ export class AuthController {
   @ApiForbiddenResponse({ description: 'CRM access is restricted to managers' })
   crmLogin(@Body() data: LoginDto) {
     return this.authService.crmLogin(data);
+  }
+
+  @Post('login')
+  @SkipTransform()
+  @ApiOperation({
+    summary: 'CRM login (frontend alias)',
+    description: 'Legacy path for the CRM board. Same as POST /auth/crm/login.',
+  })
+  @ApiOkResponse({ type: CrmLoginDataResponseDto })
+  legacyLogin(@Body() data: LoginDto) {
+    return this.authService.crmLogin(data);
+  }
+
+  @Get('me')
+  @SkipTransform()
+  @ApiBearerAuth()
+  @UseGuards(CrmAuthGuard)
+  @ApiOperation({
+    summary: 'Current CRM user (frontend alias)',
+    description: 'Legacy path for the CRM board. Same as GET /auth/crm/me.',
+  })
+  @ApiOkResponse({ type: CrmUserProfileDataResponseDto })
+  legacyMe(@Req() req: CrmAuthRequest) {
+    return this.authService.crmMe(req.user.id);
+  }
+
+  @Post('refresh')
+  @SkipTransform()
+  @ApiOperation({
+    summary: 'Refresh CRM access token (frontend alias)',
+    description: 'Legacy path for the CRM board. Same as POST /auth/crm/refresh.',
+  })
+  @ApiOkResponse({ type: CrmRefreshDataResponseDto })
+  legacyRefresh(@Body() data: RefreshTokenDto) {
+    return this.authService.crmRefresh(data);
   }
 
   @Get('crm/me')
