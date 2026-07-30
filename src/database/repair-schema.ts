@@ -196,12 +196,20 @@ async function ensureStaffUser(user: {
   password: string;
   role: 'MANAGER' | 'ADMIN';
 }) {
+  const passwordHash = hashPassword(user.password);
   const existing = await AppDataSource.query(
     `SELECT id FROM "User" WHERE email = $1 LIMIT 1`,
     [user.email],
   );
 
   if (existing.length > 0) {
+    await AppDataSource.query(
+      `UPDATE "User"
+       SET password = $1, role = $2, "firstName" = $3, "lastName" = $4
+       WHERE email = $5`,
+      [passwordHash, user.role, user.firstName, user.lastName, user.email],
+    );
+    console.log(`Repair: updated ${user.role} user ${user.email}`);
     return;
   }
 
@@ -213,7 +221,7 @@ async function ensureStaffUser(user: {
       user.firstName,
       user.lastName,
       user.email,
-      hashPassword(user.password),
+      passwordHash,
       user.role,
     ],
   );
