@@ -9,9 +9,11 @@ import { Repository } from 'typeorm';
 import { Device } from '../database/entities/device.entity';
 import { DeviceModel } from '../database/entities/device-model.entity';
 import { isUniqueViolation } from '../database/utils/is-unique-violation';
-import { mapDevice } from '../customers/utils/map-device';
-import { CreateDeviceDto } from './dto/create-device.dto';
+import { DeviceWithModel, mapDevice } from '../customers/utils/map-device';
+import { RegisterDeviceDto } from './dto/register-device.dto';
 import { UpdateDeviceTelemetryDto } from './dto/update-device-telemetry.dto';
+
+const DEFAULT_DEVICE_MODEL_ID = 7;
 
 @Injectable()
 export class DevicesService {
@@ -22,29 +24,44 @@ export class DevicesService {
     private readonly deviceModelRepo: Repository<DeviceModel>,
   ) {}
 
-  async create(data: CreateDeviceDto) {
+  async registerFromDevice(data: RegisterDeviceDto) {
+    const imei = data.imei.trim();
+    if (!imei) {
+      throw new BadRequestException('imei is required');
+    }
+
+    const idDevice = data.id_device?.trim() || imei;
+    const deviceModelId = data.id_deviceModel ?? DEFAULT_DEVICE_MODEL_ID;
+
     const deviceModel = await this.deviceModelRepo.findOne({
-      where: { id: data.id_deviceModel },
+      where: { id: deviceModelId },
     });
 
     if (!deviceModel) {
-      throw new NotFoundException(`Device model ${data.id_deviceModel} not found`);
+      throw new NotFoundException(`Device model ${deviceModelId} not found`);
     }
 
-    if (deviceModel.iccidRequired && !data.iccid?.trim()) {
-      throw new BadRequestException('ICCID is required for this device model');
+    const existing = await this.deviceRepo.findOne({
+      where: { imei },
+      relations: { deviceModelRef: true },
+    });
+
+    if (existing) {
+      return mapDevice(await this.applyOptionalFields(existing, data));
     }
 
     try {
       const device = await this.deviceRepo.save({
-        idDevice: data.id_device,
-        deviceModelId: data.id_deviceModel,
+        idDevice,
+        deviceModelId,
         iccid: data.iccid?.trim() || null,
-        imei: data.imei?.trim() || null,
+        imei,
         motorType: data.motorType,
         batteryType: data.batteryType,
         os: data.os,
         firmwareVersion: data.firmwareVersion,
+        geo: data.geo,
+        batteryState: data.batteryState,
       });
 
       const created = await this.deviceRepo.findOneOrFail({
@@ -55,12 +72,30 @@ export class DevicesService {
       return mapDevice(created);
     } catch (error) {
       if (isUniqueViolation(error)) {
+        const byImei = await this.deviceRepo.findOne({
+          where: { imei },
+          relations: { deviceModelRef: true },
+        });
+
+        if (byImei) {
+          return mapDevice(await this.applyOptionalFields(byImei, data));
+        }
+
         throw new ConflictException(
           'Device with this id_device and model, or imei, already exists',
         );
       }
       throw error;
     }
+  }
+
+  async findAll() {
+    const devices = await this.deviceRepo.find({
+      relations: { deviceModelRef: true },
+      order: { id: 'ASC' },
+    });
+
+    return devices.map((device) => mapDevice(device as DeviceWithModel));
   }
 
   async listModels() {
@@ -77,22 +112,70 @@ export class DevicesService {
   }
 
   async updateTelemetry(imei: string, data: UpdateDeviceTelemetryDto) {
-    const device = await this.deviceRepo.findOne({
-      where: { imei },
+    const normalizedImei = imei.trim();
+    let device = await this.deviceRepo.findOne({
+      where: { imei: normalizedImei },
       relations: { deviceModelRef: true },
     });
 
     if (!device) {
-      throw new NotFoundException(`Device with imei ${imei} not found`);
+      device = await this.deviceRepo.save({
+        idDevice: normalizedImei,
+        deviceModelId: DEFAULT_DEVICE_MODEL_ID,
+        imei: normalizedImei,
+        geo: data.geo,
+        batteryState: data.batteryState,
+        batteryType: data.batteryType,
+        firmwareVersion: data.firmwareVersion,
+      });
+
+      device = await this.deviceRepo.findOneOrFail({
+        where: { id: device.id },
+        relations: { deviceModelRef: true },
+      });
+    } else {
+      device.geo = data.geo;
+      device.batteryState = data.batteryState;
+      device.batteryType = data.batteryType;
+      device.firmwareVersion = data.firmwareVersion;
+
+      device = await this.deviceRepo.save(device);
     }
 
-    device.geo = data.geo;
-    device.batteryState = data.batteryState;
-    device.batteryType = data.batteryType;
-    device.firmwareVersion = data.firmwareVersion;
+    return mapDevice(device as DeviceWithModel);
+  }
+
+  private async applyOptionalFields(
+    device: Device,
+    data: RegisterDeviceDto,
+  ): Promise<DeviceWithModel> {
+    if (data.iccid?.trim()) {
+      device.iccid = data.iccid.trim();
+    }
+    if (data.motorType) {
+      device.motorType = data.motorType;
+    }
+    if (data.batteryType) {
+      device.batteryType = data.batteryType;
+    }
+    if (data.os) {
+      device.os = data.os;
+    }
+    if (data.firmwareVersion) {
+      device.firmwareVersion = data.firmwareVersion;
+    }
+    if (data.geo) {
+      device.geo = data.geo;
+    }
+    if (data.batteryState) {
+      device.batteryState = data.batteryState;
+    }
 
     const updated = await this.deviceRepo.save(device);
 
-    return mapDevice(updated);
+    return this.deviceRepo.findOneOrFail({
+      where: { id: updated.id },
+      relations: { deviceModelRef: true },
+    }) as Promise<DeviceWithModel>;
   }
 }

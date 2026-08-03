@@ -4,7 +4,6 @@ import {
   ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
-  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -12,11 +11,11 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
+import { CrmAuthGuard } from '../auth/guards/crm-auth.guard';
 import { DeviceModelListResponseDto } from '../auth/dto/device-auth-response.dto';
 import { DevicesService } from './devices.service';
-import { CreateDeviceDto } from './dto/create-device.dto';
 import { DeviceDataResponseDto } from './dto/device-response.dto';
+import { RegisterDeviceDto } from './dto/register-device.dto';
 import { UpdateDeviceTelemetryDto } from './dto/update-device-telemetry.dto';
 
 @ApiTags('devices')
@@ -24,22 +23,29 @@ import { UpdateDeviceTelemetryDto } from './dto/update-device-telemetry.dto';
 export class DevicesController {
   constructor(private readonly devicesService: DevicesService) {}
 
-  @Post()
+  @Get()
   @ApiBearerAuth()
-  @UseGuards(AdminAuthGuard)
+  @UseGuards(CrmAuthGuard)
+  @ApiOperation({ summary: 'List all devices (CRM)' })
+  @ApiOkResponse({ description: 'Device list wrapped as { data: Device[] } by response interceptor' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid CRM token' })
+  findAll() {
+    return this.devicesService.findAll();
+  }
+
+  @Post()
   @ApiOperation({
-    summary: 'Add device to whitelist (admin only)',
+    summary: 'Register device (open, no auth — temporary for dev)',
     description:
-      'Pre-provision a device so it can be used for device register/login. Device is created without a user.',
+      'Device self-registration without user or whitelist. Idempotent by imei. ' +
+      'Optional geo/batteryState on first ping. Updates via PUT /devices/:imei.',
   })
   @ApiCreatedResponse({ type: DeviceDataResponseDto })
-  @ApiBadRequestResponse({ description: 'Validation failed or ICCID required' })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid CRM token' })
-  @ApiForbiddenResponse({ description: 'Admin access required' })
+  @ApiBadRequestResponse({ description: 'Validation failed' })
   @ApiNotFoundResponse({ description: 'Device model not found' })
-  @ApiConflictResponse({ description: 'Device already exists' })
-  create(@Body() data: CreateDeviceDto) {
-    return this.devicesService.create(data);
+  @ApiConflictResponse({ description: 'Device id conflict' })
+  register(@Body() data: RegisterDeviceDto) {
+    return this.devicesService.registerFromDevice(data);
   }
 
   @Post('models')
@@ -58,7 +64,9 @@ export class DevicesController {
 
   @Put(':imei')
   @ApiOperation({
-    summary: 'Update device telemetry: geo, batteryState, batteryType, firmwareVersion',
+    summary: 'Update device telemetry (open, no auth — temporary for dev)',
+    description:
+      'Updates geo, batteryState, batteryType, firmwareVersion. Creates device by imei if missing.',
   })
   @ApiParam({ name: 'imei', example: '869091030624950' })
   @ApiOkResponse({ type: DeviceDataResponseDto })

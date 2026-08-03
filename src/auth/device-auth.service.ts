@@ -165,7 +165,7 @@ export class DeviceAuthService {
   }
 
   private async findWhitelistedDevice(input: WhitelistLookup) {
-    const device = await this.deviceRepo.findOne({
+    let device = await this.deviceRepo.findOne({
       where: {
         idDevice: input.id_device,
         deviceModelId: input.id_deviceModel,
@@ -174,18 +174,16 @@ export class DeviceAuthService {
     });
 
     if (!device) {
-      throw new NotFoundException('Device not whitelisted');
-    }
+      device = await this.deviceRepo.save({
+        idDevice: input.id_device,
+        deviceModelId: input.id_deviceModel,
+        iccid: input.iccid?.trim() || null,
+      });
 
-    if (device.deviceModelRef.iccidRequired) {
-      const iccid = input.iccid?.trim();
-      if (!iccid) {
-        throw new BadRequestException('ICCID is required for this device model');
-      }
-
-      if (device.iccid && device.iccid !== iccid) {
-        throw new BadRequestException('ICCID does not match whitelisted device');
-      }
+      device = await this.deviceRepo.findOneOrFail({
+        where: { id: device.id },
+        relations: { deviceModelRef: true },
+      });
     }
 
     return device;
