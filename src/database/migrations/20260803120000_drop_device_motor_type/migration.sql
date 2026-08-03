@@ -1,0 +1,1 @@
+ALTER TABLE "Device" DROP COLUMN IF EXISTS "motorType";

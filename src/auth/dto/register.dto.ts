@@ -22,10 +22,6 @@ export class RegisterDeviceDto {
   @IsString()
   deviceModel: string;
 
-  @ApiProperty({ example: '28V' })
-  @IsString()
-  motorType: string;
-
   @ApiProperty({ example: 'Lithium' })
   @IsString()
   batteryType: string;

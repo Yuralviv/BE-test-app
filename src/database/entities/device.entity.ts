@@ -48,9 +48,6 @@ export class Device {
   @Column({ type: 'varchar', unique: true, nullable: true })
   imei: string | null;
 
-  @Column({ name: 'motorType', default: '28V' })
-  motorType: string;
-
   @Column({ name: 'batteryType', default: 'Lithium' })
   batteryType: string;
 

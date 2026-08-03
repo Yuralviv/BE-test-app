@@ -45,11 +45,6 @@ export class RegisterDeviceDto {
   @IsString()
   iccid?: string;
 
-  @ApiPropertyOptional({ example: '28V' })
-  @IsOptional()
-  @IsString()
-  motorType?: string;
-
   @ApiPropertyOptional({ example: 'Lithium' })
   @IsOptional()
   @IsString()

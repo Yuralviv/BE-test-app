@@ -60,7 +60,6 @@ export class DevicesService {
         deviceModelId,
         iccid: resolveIccid(data.iccid),
         imei,
-        motorType: data.motorType,
         batteryType: data.batteryType,
         os: data.os,
         firmwareVersion: data.firmwareVersion,
@@ -156,9 +155,6 @@ export class DevicesService {
   ): Promise<DeviceWithModel> {
     if (data.iccid?.trim()) {
       device.iccid = data.iccid.trim();
-    }
-    if (data.motorType) {
-      device.motorType = data.motorType;
     }
     if (data.batteryType) {
       device.batteryType = data.batteryType;

@@ -15,7 +15,6 @@ export type Device = {
   iccid: string;
   imei: string;
   deviceModel: string;
-  motorType: string;
   batteryType: string;
   os: DeviceOs;
   firmwareVersion: string;

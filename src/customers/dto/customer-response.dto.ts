@@ -35,9 +35,6 @@ export class DeviceResponseDto {
   @ApiProperty({ example: 'M7 GPS' })
   deviceModel: string;
 
-  @ApiProperty({ example: '28V' })
-  motorType: string;
-
   @ApiProperty({ example: 'Lithium' })
   batteryType: string;
 

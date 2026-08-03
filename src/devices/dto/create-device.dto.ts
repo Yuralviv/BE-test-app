@@ -30,11 +30,6 @@ export class CreateDeviceDto {
   @IsString()
   imei?: string;
 
-  @ApiPropertyOptional({ example: '28V' })
-  @IsOptional()
-  @IsString()
-  motorType?: string;
-
   @ApiPropertyOptional({ example: 'Lithium' })
   @IsOptional()
   @IsString()

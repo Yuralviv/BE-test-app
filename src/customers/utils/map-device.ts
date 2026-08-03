@@ -13,7 +13,6 @@ export function mapDevice(
     iccid: device.iccid ?? '',
     imei: device.imei ?? '',
     deviceModel: device.deviceModelRef?.name ?? '',
-    motorType: device.motorType,
     batteryType: device.batteryType,
     os: device.os,
     firmwareVersion: device.firmwareVersion,
