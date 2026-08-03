@@ -203,6 +203,14 @@ async function repairDeviceColumns() {
   await AppDataSource.query(
     `ALTER TABLE "Device" ALTER COLUMN "iccid" DROP NOT NULL`,
   ).catch(() => undefined);
+
+  await AppDataSource.query(
+    `ALTER TABLE "Device" ALTER COLUMN "createdAt" SET DEFAULT CURRENT_TIMESTAMP`,
+  ).catch(() => undefined);
+
+  await AppDataSource.query(
+    `ALTER TABLE "Device" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP`,
+  ).catch(() => undefined);
 }
 
 async function ensureStaffUser(user: {

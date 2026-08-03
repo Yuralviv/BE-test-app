@@ -174,10 +174,13 @@ export class DeviceAuthService {
     });
 
     if (!device) {
+      const now = new Date();
       device = await this.deviceRepo.save({
         idDevice: input.id_device,
         deviceModelId: input.id_deviceModel,
         iccid: input.iccid?.trim() || '',
+        createdAt: now,
+        updatedAt: now,
       });
 
       device = await this.deviceRepo.findOneOrFail({

@@ -19,6 +19,11 @@ function resolveIccid(iccid: string | undefined): string {
   return iccid?.trim() || '';
 }
 
+function deviceTimestamps() {
+  const now = new Date();
+  return { createdAt: now, updatedAt: now };
+}
+
 @Injectable()
 export class DevicesService {
   constructor(
@@ -65,6 +70,7 @@ export class DevicesService {
         firmwareVersion: data.firmwareVersion,
         geo: data.geo,
         batteryState: data.batteryState,
+        ...deviceTimestamps(),
       });
 
       const created = await this.deviceRepo.findOneOrFail({
@@ -131,6 +137,7 @@ export class DevicesService {
         batteryState: data.batteryState,
         batteryType: data.batteryType,
         firmwareVersion: data.firmwareVersion,
+        ...deviceTimestamps(),
       });
 
       device = await this.deviceRepo.findOneOrFail({
