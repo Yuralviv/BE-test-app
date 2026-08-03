@@ -205,7 +205,7 @@ async function ensureStaffUser(user: {
   if (existing.length > 0) {
     await AppDataSource.query(
       `UPDATE "User"
-       SET password = $1, role = $2, "firstName" = $3, "lastName" = $4
+       SET password = $1, role = $2, "firstName" = $3, "lastName" = $4, "updatedAt" = NOW()
        WHERE email = $5`,
       [passwordHash, user.role, user.firstName, user.lastName, user.email],
     );
@@ -214,8 +214,8 @@ async function ensureStaffUser(user: {
   }
 
   await AppDataSource.query(
-    `INSERT INTO "User" (id, "firstName", "lastName", email, password, role)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
+    `INSERT INTO "User" (id, "firstName", "lastName", email, password, role, "createdAt", "updatedAt")
+     VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())`,
     [
       user.id,
       user.firstName,
