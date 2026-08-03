@@ -10,10 +10,13 @@ import { Device } from '../database/entities/device.entity';
 import { DeviceModel } from '../database/entities/device-model.entity';
 import { isUniqueViolation } from '../database/utils/is-unique-violation';
 import { DeviceWithModel, mapDevice } from '../customers/utils/map-device';
+import { DeviceOs } from '../database/enums/device-os.enum';
 import { RegisterDeviceDto } from './dto/register-device.dto';
 import { UpdateDeviceTelemetryDto } from './dto/update-device-telemetry.dto';
 
 const DEFAULT_DEVICE_MODEL_ID = 7;
+const DEFAULT_GEO = { lat: 0, lng: 0 };
+const DEFAULT_BATTERY_STATE = { level: 0, charging: false };
 
 function resolveIccid(iccid: string | undefined): string {
   return iccid?.trim() || '';
@@ -22,6 +25,16 @@ function resolveIccid(iccid: string | undefined): string {
 function deviceTimestamps() {
   const now = new Date();
   return { createdAt: now, updatedAt: now };
+}
+
+function resolveRegisterFields(data: RegisterDeviceDto) {
+  return {
+    batteryType: data.batteryType ?? 'Lithium',
+    os: data.os ?? DeviceOs.LINUX,
+    firmwareVersion: data.firmwareVersion ?? '0.0.0',
+    geo: data.geo ?? DEFAULT_GEO,
+    batteryState: data.batteryState ?? DEFAULT_BATTERY_STATE,
+  };
 }
 
 @Injectable()
@@ -60,16 +73,13 @@ export class DevicesService {
     }
 
     try {
+      const fields = resolveRegisterFields(data);
       const device = await this.deviceRepo.save({
         idDevice,
         deviceModelId,
         iccid: resolveIccid(data.iccid),
         imei,
-        batteryType: data.batteryType,
-        os: data.os,
-        firmwareVersion: data.firmwareVersion,
-        geo: data.geo,
-        batteryState: data.batteryState,
+        ...fields,
         ...deviceTimestamps(),
       });
 
@@ -88,6 +98,15 @@ export class DevicesService {
 
         if (byImei) {
           return mapDevice(await this.applyOptionalFields(byImei, data));
+        }
+
+        const byIdDevice = await this.deviceRepo.findOne({
+          where: { idDevice, deviceModelId },
+          relations: { deviceModelRef: true },
+        });
+
+        if (byIdDevice) {
+          return mapDevice(await this.applyOptionalFields(byIdDevice, data));
         }
 
         throw new ConflictException(
@@ -137,6 +156,7 @@ export class DevicesService {
         batteryState: data.batteryState,
         batteryType: data.batteryType,
         firmwareVersion: data.firmwareVersion,
+        os: DeviceOs.LINUX,
         ...deviceTimestamps(),
       });
 
