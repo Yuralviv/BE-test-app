@@ -165,6 +165,19 @@ async function repairDeviceColumns() {
     );
   }
 
+  if (await columnExists('Device', 'userId')) {
+    await AppDataSource.query(
+      `ALTER TABLE "Device" ALTER COLUMN "userId" DROP NOT NULL`,
+    );
+    console.log('Repair: Device.userId is nullable');
+  }
+
+  if (await columnExists('Device', 'imei')) {
+    await AppDataSource.query(
+      `ALTER TABLE "Device" ALTER COLUMN "imei" DROP NOT NULL`,
+    ).catch(() => undefined);
+  }
+
   if (!(await columnExists('Device', 'idDevice'))) {
     await AppDataSource.query(`ALTER TABLE "Device" ADD COLUMN "idDevice" TEXT`);
     await AppDataSource.query(
