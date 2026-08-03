@@ -187,6 +187,14 @@ async function repairDeviceColumns() {
     );
   }
 
+  if (
+    (await columnExists('Device', 'deviceModel')) &&
+    (await columnExists('Device', 'deviceModelId'))
+  ) {
+    await AppDataSource.query(`ALTER TABLE "Device" DROP COLUMN "deviceModel"`);
+    console.log('Repair: dropped legacy Device.deviceModel column');
+  }
+
   await AppDataSource.query(
     `ALTER TABLE "Device" ALTER COLUMN "iccid" DROP NOT NULL`,
   ).catch(() => undefined);
