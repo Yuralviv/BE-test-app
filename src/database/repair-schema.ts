@@ -186,6 +186,10 @@ async function repairDeviceColumns() {
       `ALTER TABLE "Device" ALTER COLUMN "deviceModelId" SET NOT NULL`,
     );
   }
+
+  await AppDataSource.query(
+    `ALTER TABLE "Device" ALTER COLUMN "iccid" DROP NOT NULL`,
+  ).catch(() => undefined);
 }
 
 async function ensureStaffUser(user: {

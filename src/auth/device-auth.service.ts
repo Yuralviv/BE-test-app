@@ -177,7 +177,7 @@ export class DeviceAuthService {
       device = await this.deviceRepo.save({
         idDevice: input.id_device,
         deviceModelId: input.id_deviceModel,
-        iccid: input.iccid?.trim() || null,
+        iccid: input.iccid?.trim() || '',
       });
 
       device = await this.deviceRepo.findOneOrFail({

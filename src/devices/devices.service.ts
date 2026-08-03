@@ -15,6 +15,10 @@ import { UpdateDeviceTelemetryDto } from './dto/update-device-telemetry.dto';
 
 const DEFAULT_DEVICE_MODEL_ID = 7;
 
+function resolveIccid(iccid: string | undefined): string {
+  return iccid?.trim() || '';
+}
+
 @Injectable()
 export class DevicesService {
   constructor(
@@ -54,7 +58,7 @@ export class DevicesService {
       const device = await this.deviceRepo.save({
         idDevice,
         deviceModelId,
-        iccid: data.iccid?.trim() || null,
+        iccid: resolveIccid(data.iccid),
         imei,
         motorType: data.motorType,
         batteryType: data.batteryType,
@@ -122,6 +126,7 @@ export class DevicesService {
       device = await this.deviceRepo.save({
         idDevice: normalizedImei,
         deviceModelId: DEFAULT_DEVICE_MODEL_ID,
+        iccid: '',
         imei: normalizedImei,
         geo: data.geo,
         batteryState: data.batteryState,
